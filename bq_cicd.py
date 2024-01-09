@@ -202,13 +202,13 @@ if __name__ == "__main__":
     # Define constants and settings
     expiration_duration = 30 * 24 * 60 * 60 * 1000  # Expiration duration for datasets, set to 1 month in milliseconds
     location = 'EU'  # All datasets are located in the multi-region EU
-    credentials = pydata_google_auth.load_user_credentials("../../shared/credentials-ref.json")  # Load cross-project credentials
+  ##  credentials = pydata_google_auth.load_user_credentials("../../shared/credentials-ref.json")  # Load cross-project credentials
 
     # Returns a list of config and SQL files based on files passed
     config_files_list, sql_files_list = file_setup(files_name, files_status)
 
     # Create a BigQuery client
-    bq_client = bigquery.Client(project=project_id, credentials=credentials)
+    bq_client = bigquery.Client(project=project_id) ## credentials=credentials
 
     # Check the datasets in the project and decide on the dataset name based on the branch
     # For a feature branch, it ensures that a corresponding dataset exists, and if not, it creates one.
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     if len(config_files_list) > 0:
         
         # Create a BigQuery Data Transfer Service client
-        transfer_client = bigquery_datatransfer.DataTransferServiceClient(credentials=credentials)
+        transfer_client = bigquery_datatransfer.DataTransferServiceClient()## credentials= credentials
         
         # Check if there are SQL files to process
         if len(sql_files_list) > 0:
