@@ -1,0 +1,43 @@
+steps:
+# Step to deploy tables to BigQuery using DDL statements provided in SQL files.
+- name: us-central1-docker.pkg.dev/peppy-freedom-401714/repo-1/ci-cd-default:1.0
+  id: 'create-tables'
+  entrypoint: python
+  args: ["../bq_cicd.py", '$PROJECT_ID', '$BRANCH_NAME', '$_FILES_FILENAME', '$_FILES_STATUS']
+  dir: ${_DIRECTORY}/tables
+
+# Step to deploy stored procedures to BigQuery.
+- name: us-central1-docker.pkg.dev/peppy-freedom-401714/repo-1/ci-cd-default:1.0
+  id: 'create-stored-procedures'
+  waitFor: ['create-tables']
+  entrypoint: python
+  args: ["../bq_cicd.py", '$PROJECT_ID', '$BRANCH_NAME', '$_FILES_FILENAME', '$_FILES_STATUS']
+  dir: ${_DIRECTORY}/proc
+
+# Step to deploy BigQuery schedules using config files.
+- name: us-central1-docker.pkg.dev/peppy-freedom-401714/repo-1/ci-cd-default:1.0
+  id: 'create-schedule'
+  waitFor: ['create-stored-procedures']
+  entrypoint: python
+  args: ["../bq_cicd.py", '$PROJECT_ID', '$BRANCH_NAME', '$_FILES_FILENAME', '$_FILES_STATUS']
+  dir: ${_DIRECTORY}/schedule
+
+# # Step to update the field descriptions in a table.
+# - name: europe-west2-docker.pkg.dev/skyuk-uk-decis-etl-01-${_ENV}/custom-cloud-builders/decis-etl-default:3.0
+#   id: 'updating-table-data-dict'
+#   waitFor: ['create-tables']
+#   entrypoint: python
+#   args: ["../bq_cicd.py", '$PROJECT_ID', '$BRANCH_NAME', '$_FILES_FILENAME', '$_FILES_STATUS']
+#   dir: ${_DIRECTORY}/data_dict
+
+# Step to deploy views to BigQuery.
+- name: us-central1-docker.pkg.dev/peppy-freedom-401714/repo-1/ci-cd-default:1.0
+  id: 'create-views'
+  waitFor: ['create-schedule']
+  entrypoint: python
+  args: ["../bq_cicd.py", '$PROJECT_ID', '$BRANCH_NAME', '$_FILES_FILENAME', '$_FILES_STATUS']
+  dir: ${_DIRECTORY}/views
+
+# Ensure logs are sent to Cloud Logging only.
+options:
+  logging: CLOUD_LOGGING_ONLY
